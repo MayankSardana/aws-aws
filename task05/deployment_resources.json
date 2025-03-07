@@ -14,7 +14,12 @@
             "dynamodb:DeleteItem",
             "ssm:PutParameter",
             "ssm:GetParameter",
-            "kms:Decrypt"
+            "kms:Decrypt",
+            "dynamodb:GetItem",
+            "dynamodb:Query",
+            "dynamodb:PutItem",
+            "dynamodb:Batch*",
+            "dynamodb:DeleteItem"
           ],
           "Effect": "Allow",
           "Resource": "*"
@@ -25,26 +30,28 @@
     "resource_type": "iam_policy",
     "tags": {}
   },
-  "hello_world-role": {
-    "predefined_policies": [],
-    "principal_service": "lambda",
-    "custom_policies": [
-      "lambda-basic-execution"
-    ],
-    "resource_type": "iam_role",
+  "${target_table}": {
+    "resource_type": "dynamodb_table",
+    "hash_key_name": "id",
+    "hash_key_type": "S",
+    "read_capacity": 1,
+    "write_capacity": 1,
+    "global_indexes": [],
+    "autoscaling": [],
     "tags": {}
   },
-  "task3_api": {
+  "task5_api": {
     "resource_type": "api_gateway",
     "deploy_stage": "api",
     "dependencies": [],
     "resources": {
-      "/hello": {
+      "/events": {
         "enable_cors": false,
-        "GET": {
+        "POST": {
+          "enable_proxy": true,
           "authorization_type": "NONE",
           "integration_type": "lambda",
-          "lambda_name": "hello_world",
+          "lambda_name": "api_handler",
           "api_key_required": false,
           "method_request_parameters": {},
           "integration_request_body_template": {},
@@ -54,34 +61,6 @@
         }
       }
     },
-    "tags": {}
-  },
-  "async_queue": {
-    "resource_type": "sqs_queue",
-    "fifo_queue": false,
-    "visibility_timeout": 150,
-    "delay_seconds": 0,
-    "maximum_message_size": 1024,
-    "message_retention_period": 60,
-    "receive_message_wait_time_seconds": 0,
-    "policy": {},
-    "redrive_policy": {},
-    "content_based_deduplication": false,
-    "tags": {}
-  },
-  "lambda_topic": {
-    "resource_type": "sns_topic",
-    "region": "eu-central-1",
-    "event_sources": [],
-    "tags": {}
-  },
-  "sqs_handler-role": {
-    "predefined_policies": [],
-    "principal_service": "lambda",
-    "custom_policies": [
-      "lambda-basic-execution"
-    ],
-    "resource_type": "iam_role",
     "tags": {}
   }
 }
